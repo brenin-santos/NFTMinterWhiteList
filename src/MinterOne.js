@@ -18,8 +18,6 @@ const Minter = (props) => {
   const [totalSupply, setTotalSupply] = useState(0);
   const [error, setError] = useState("");
   const [price, setPrice] = useState(0);
-  const [walletIsWhiteList, setWallerIsWhiteList] = useState(false);
-  const [isFree, setIsFree] = useState(true);
 
   const { ethers } = require("ethers");
   const contractABI = require("./contract-abi.json");
@@ -43,29 +41,6 @@ const Minter = (props) => {
     setWalletAddress(walletResponse.address);
   };
 
-  useEffect(() => {
-    if (quantity === 0) {
-      setQuantity(1);
-    }
-    if (quantity > 3) {
-      setQuantity(3);
-    }
-  }, [quantity]);
-
-  const getWhiteList = useCallback(async () => {
-    if (walletAddress) {
-      const useWhiteList = !!whitelist.find(
-        (item) => item === `${walletAddress}`
-      );
-
-      setWallerIsWhiteList(useWhiteList);
-    }
-  }, [walletAddress]);
-
-  useEffect(() => {
-    getWhiteList();
-  }, [getWhiteList]);
-
   const calculatePrice = useCallback(async () => {
     const browserProvider = await detectEthereumProvider();
     const provider = new ethers.providers.Web3Provider(browserProvider);
@@ -75,9 +50,7 @@ const Minter = (props) => {
       provider.getSigner()
     );
     const tokenPrice = await contract.cost();
-
     const newPrice = ethers.utils.formatEther(tokenPrice._hex);
-
     const conta = (newPrice * quantity).toFixed(3);
 
     setPrice(conta);
@@ -93,38 +66,6 @@ const Minter = (props) => {
     calculatePrice();
   }, [quantity, calculatePrice]);
 
-  const getFreePrice = useCallback(async () => {
-    const browserProvider = await detectEthereumProvider();
-
-    const provider = new ethers.providers.Web3Provider(browserProvider);
-
-    const contract = new ethers.Contract(
-      contractAddress,
-      contractABI,
-      provider.getSigner()
-    );
-
-    const balanceOf = await contract.balanceOf(contractAddress);
-
-    const newBalanceOf = ethers.utils.formatEther(balanceOf._hex);
-
-    const quantidadeDeMints = "0.000000000000000001";
-
-    if (newBalanceOf < quantidadeDeMints && walletIsWhiteList) {
-      setIsFree(true);
-    } else {
-      setIsFree(false);
-    }
-  }, [
-    contractABI,
-    ethers.Contract,
-    ethers.providers.Web3Provider,
-    ethers.utils,
-    walletIsWhiteList,
-  ]);
-
-  useEffect(() => getFreePrice(), [getFreePrice]);
-
   useEffect(() => {
     if (walletAddress) {
       const getSupply = async () => {
@@ -135,9 +76,7 @@ const Minter = (props) => {
           contractABI,
           provider.getSigner()
         );
-
         const totalSupply = await contract.totalSupply();
-
         setTotalSupply(Number(totalSupply._hex));
 
         const supplyQuantity = await contract.maxSupply();
@@ -159,12 +98,6 @@ const Minter = (props) => {
       setError("");
     }, 10000);
   }, [error]);
-
-  useEffect(() => {
-    if (isFree) {
-      setQuantity(1);
-    }
-  }, [isFree, quantity]);
 
   function addWalletListener() {
     if (window.ethereum) {
@@ -192,39 +125,21 @@ const Minter = (props) => {
   }
 
   const mintTokens = async (mintAmount) => {
-    if (isFree) {
-      const browserProvider = await detectEthereumProvider();
-      const provider = new ethers.providers.Web3Provider(browserProvider);
-      const contract = new ethers.Contract(
-        contractAddress,
-        contractABI,
-        provider.getSigner()
-      );
+    const browserProvider = await detectEthereumProvider();
+    const provider = new ethers.providers.Web3Provider(browserProvider);
+    const contract = new ethers.Contract(
+      contractAddress,
+      contractABI,
+      provider.getSigner()
+    );
+    const tokenPrice = await contract.cost();
 
-      try {
-        await contract.mint(mintAmount, {
-          value: 0,
-        });
-      } catch (e) {
-        setError(e.code);
-      }
-    } else {
-      const browserProvider = await detectEthereumProvider();
-      const provider = new ethers.providers.Web3Provider(browserProvider);
-      const contract = new ethers.Contract(
-        contractAddress,
-        contractABI,
-        provider.getSigner()
-      );
-      const tokenPrice = await contract.cost();
-
-      try {
-        await contract.mint(mintAmount, {
-          value: tokenPrice.mul(mintAmount),
-        });
-      } catch (e) {
-        setError(e.code);
-      }
+    try {
+      await contract.mint(mintAmount, {
+        value: tokenPrice.mul(mintAmount),
+      });
+    } catch (e) {
+      setError(e.code);
     }
   };
 
@@ -267,17 +182,11 @@ const Minter = (props) => {
                 <p className="wallet-name">Sale Status:</p>
                 {totalSupply === maxSupply ? <p>Closed</p> : <p>Open</p>}
               </div>
-              {isFree ? (
-                <div className="card-supply">
-                  <p className="wallet-name">Price:</p>
-                  <p>Free White List</p>
-                </div>
-              ) : (
-                <div className="card-supply">
-                  <p className="wallet-name">Price:</p>
-                  <p>{price} ETH</p>
-                </div>
-              )}
+
+              <div className="card-supply">
+                <p className="wallet-name">Price:</p>
+                <p>{price} ETH</p>
+              </div>
             </div>
 
             <div className="container-inputs-buttons">
@@ -285,14 +194,22 @@ const Minter = (props) => {
                 <div className="card-input">
                   <button
                     className="card-negative"
-                    onClick={() => setQuantity(quantity - 1)}
+                    onClick={() => {
+                      if (quantity > 1) {
+                        setQuantity(quantity - 1);
+                      }
+                    }}
                   >
                     -
                   </button>
                   <div className="card-input-number">{quantity}</div>
                   <button
                     className="card-positive"
-                    onClick={() => setQuantity(quantity + 1)}
+                    onClick={() => {
+                      if (quantity < 3) {
+                        setQuantity(quantity + 1);
+                      }
+                    }}
                   >
                     +
                   </button>
