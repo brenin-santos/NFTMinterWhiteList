@@ -55,7 +55,7 @@ const MinterWhiteList = (props) => {
   const getWhiteList = useCallback(async () => {
     if (walletAddress) {
       const useWhiteList = !!whitelist.find(
-        (item) => item === `${walletAddress}`
+        (item) => item.toLowerCase() === walletAddress.toLowerCase()
       );
 
       setWallerIsWhiteList(useWhiteList);
