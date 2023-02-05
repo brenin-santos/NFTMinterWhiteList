@@ -96,7 +96,7 @@ const MinterSupply = (props) => {
       provider.getSigner()
     );
 
-    const balanceOf = await contract.balanceOf(contractAddress);
+    const balanceOf = await contract.balanceOf(walletAddress);
 
     const newBalanceOf = ethers.utils.formatEther(balanceOf._hex);
 
@@ -112,6 +112,7 @@ const MinterSupply = (props) => {
     ethers.utils,
     totalSupply,
     supply,
+    walletAddress,
   ]);
 
   useEffect(() => getFreePrice(), [getFreePrice]);
@@ -287,9 +288,6 @@ const MinterSupply = (props) => {
             </button>
           </section>
         )}
-        <div className="rules">
-          <img src="img/rules.png" alt="rules"></img>
-        </div>
       </main>
     </div>
   );

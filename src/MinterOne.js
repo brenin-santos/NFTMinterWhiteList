@@ -5,8 +5,6 @@ import "./Minter.css";
 
 import detectEthereumProvider from "@metamask/detect-provider";
 
-import { whitelist } from "./utils/whitelist";
-
 const Minter = (props) => {
   const [walletAddress, setWalletAddress] = useState("");
 

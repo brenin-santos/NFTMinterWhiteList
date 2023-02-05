@@ -1,4 +1,3 @@
-import { useState } from "react";
 import MinterWhiteList from "./MinterWhiteList";
 import MinterSupply from "./MinterSupply";
 import MinterFree from "./MinterFree";

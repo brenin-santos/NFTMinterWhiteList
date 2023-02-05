@@ -59,7 +59,7 @@ const MinterFree = () => {
       provider.getSigner()
     );
 
-    const balanceOf = await contract.balanceOf(contractAddress);
+    const balanceOf = await contract.balanceOf(walletAddress);
 
     const newBalanceOf = ethers.utils.formatEther(balanceOf._hex);
 
@@ -75,6 +75,7 @@ const MinterFree = () => {
     ethers.Contract,
     ethers.providers.Web3Provider,
     ethers.utils,
+    walletAddress,
   ]);
 
   useEffect(() => getFreePrice(), [getFreePrice]);
