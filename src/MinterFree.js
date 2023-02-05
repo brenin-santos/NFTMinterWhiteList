@@ -227,7 +227,7 @@ const MinterFree = () => {
   };
 
   return (
-    <div className="container">
+    <div className="container" style={{ height: "120vh" }}>
       {error && <div className="error">{error}</div>}
       <header>
         <a href="https://twitter.com.br">

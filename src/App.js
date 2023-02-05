@@ -3,7 +3,7 @@ import MinterSupply from "./MinterSupply";
 import MinterFree from "./MinterFree";
 import MinterOne from "./MinterOne";
 
-const project = "mintersupply";
+const project = "minterfree";
 
 function App() {
   if (project === "minterwhitelist") {
