@@ -6,16 +6,6 @@
   background-size: 100% 100%;
   background-repeat: no-repeat;
 }
-header {
-  height: 7%;
-  width: 100%;
-  background-color: #0855b6;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-}
 /* main {
   height: 100vh;
 } */

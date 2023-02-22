@@ -12,8 +12,9 @@
     "ethers": "^5.6.8",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "react-scripts": "4.0.3",
+    "react-scripts": "^5.0.1",
     "solc": "^0.8.14-fixed",
+    "styled-components": "^5.3.6",
     "web-vitals": "^1.0.1"
   },
   "scripts": {

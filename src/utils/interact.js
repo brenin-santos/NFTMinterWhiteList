@@ -1,3 +1,9 @@
+import detectEthereumProvider from "@metamask/detect-provider";
+
+const { ethers } = require("ethers");
+const contractABI = require("../contract-abi.json");
+const contractAddress = "0x28b44614080047260371E8AAa98FE279D93f673e";
+
 export const connectWallet = async () => {
   if (window.ethereum) {
     try {
@@ -73,4 +79,14 @@ export const getCurrentWalletConnected = async () => {
       ),
     };
   }
+};
+export const handleContract = async () => {
+  const browserProvider = await detectEthereumProvider();
+  const provider = new ethers.providers.Web3Provider(browserProvider);
+  const contract = new ethers.Contract(
+    contractAddress,
+    contractABI,
+    provider.getSigner()
+  );
+  return contract;
 };

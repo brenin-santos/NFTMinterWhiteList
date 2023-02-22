@@ -1,12 +1,18 @@
 import { useEffect, useState, useCallback } from "react";
-import { connectWallet, getCurrentWalletConnected } from "./utils/interact";
+import {
+  connectWallet,
+  getCurrentWalletConnected,
+  handleContract,
+} from "./utils/interact";
+import { formatEther } from "./utils/formats";
+
+import { Header } from "./components/Header";
 
 import "./Minter.css";
 
-import detectEthereumProvider from "@metamask/detect-provider";
-
 const MinterFree = () => {
   const [walletAddress, setWallet] = useState("");
+  const [contract, setContract] = useState(null);
   const [isFree, setIsFree] = useState(false);
   // eslint-disable-next-line no-unused-vars
   const [status, setStatus] = useState("");
@@ -17,9 +23,13 @@ const MinterFree = () => {
   const [error, setError] = useState("");
   const [price, setPrice] = useState(0);
 
-  const { ethers } = require("ethers");
-  const contractABI = require("./contract-abi.json");
-  const contractAddress = "0x28b44614080047260371E8AAa98FE279D93f673e";
+  useEffect(() => {
+    const fetchContract = async () => {
+      const contract = await handleContract();
+      setContract(contract);
+    };
+    fetchContract();
+  }, []);
 
   useEffect(() => {
     async function fetchData() {
@@ -49,19 +59,9 @@ const MinterFree = () => {
   }, [quantity]);
 
   const getFreePrice = useCallback(async () => {
-    const browserProvider = await detectEthereumProvider();
-
-    const provider = new ethers.providers.Web3Provider(browserProvider);
-
-    const contract = new ethers.Contract(
-      contractAddress,
-      contractABI,
-      provider.getSigner()
-    );
-
     const balanceOf = await contract.balanceOf(walletAddress);
 
-    const newBalanceOf = ethers.utils.formatEther(balanceOf._hex);
+    const newBalanceOf = formatEther(balanceOf);
 
     const quantidadeDeMints = "0.000000000000000001";
 
@@ -70,27 +70,14 @@ const MinterFree = () => {
     } else {
       setIsFree(false);
     }
-  }, [
-    contractABI,
-    ethers.Contract,
-    ethers.providers.Web3Provider,
-    ethers.utils,
-    walletAddress,
-  ]);
+  }, [contract, walletAddress]);
 
   useEffect(() => getFreePrice(), [getFreePrice]);
 
   const calculatePrice = useCallback(async () => {
-    const browserProvider = await detectEthereumProvider();
-    const provider = new ethers.providers.Web3Provider(browserProvider);
-    const contract = new ethers.Contract(
-      contractAddress,
-      contractABI,
-      provider.getSigner()
-    );
     const tokenPrice = await contract.cost();
 
-    const newPrice = ethers.utils.formatEther(tokenPrice._hex);
+    const newPrice = formatEther(tokenPrice);
 
     if (isFree) {
       const conta = (newPrice * (quantity - 1)).toFixed(3);
@@ -101,14 +88,7 @@ const MinterFree = () => {
 
       setPrice(conta);
     }
-  }, [
-    contractABI,
-    ethers.Contract,
-    ethers.providers.Web3Provider,
-    ethers.utils,
-    quantity,
-    isFree,
-  ]);
+  }, [contract, isFree, quantity]);
 
   useEffect(() => {
     calculatePrice();
@@ -117,14 +97,6 @@ const MinterFree = () => {
   useEffect(() => {
     if (walletAddress) {
       const getSupply = async () => {
-        const browserProvider = await detectEthereumProvider();
-        const provider = new ethers.providers.Web3Provider(browserProvider);
-        const contract = new ethers.Contract(
-          contractAddress,
-          contractABI,
-          provider.getSigner()
-        );
-
         const totalSupply = await contract.totalSupply();
 
         setTotalSupply(Number(totalSupply._hex));
@@ -135,13 +107,7 @@ const MinterFree = () => {
       };
       getSupply();
     }
-  }, [
-    walletAddress,
-    contractAddress,
-    ethers.providers.Web3Provider,
-    ethers.Contract,
-    contractABI,
-  ]);
+  }, [walletAddress, contract]);
 
   useEffect(() => {
     if (totalSupply > maxSupply) {
@@ -190,14 +156,6 @@ const MinterFree = () => {
   const mintTokens = async (mintAmount) => {
     if (isFree) {
       if (quantity === 1) {
-        const browserProvider = await detectEthereumProvider();
-        const provider = new ethers.providers.Web3Provider(browserProvider);
-        const contract = new ethers.Contract(
-          contractAddress,
-          contractABI,
-          provider.getSigner()
-        );
-
         try {
           await contract.mint(mintAmount, {
             value: 0,
@@ -207,13 +165,6 @@ const MinterFree = () => {
         }
       }
     } else {
-      const browserProvider = await detectEthereumProvider();
-      const provider = new ethers.providers.Web3Provider(browserProvider);
-      const contract = new ethers.Contract(
-        contractAddress,
-        contractABI,
-        provider.getSigner()
-      );
       const tokenPrice = await contract.cost();
 
       try {
@@ -229,17 +180,7 @@ const MinterFree = () => {
   return (
     <div className="container" style={{ height: "120vh" }}>
       {error && <div className="error">{error}</div>}
-      <header>
-        <a href="https://twitter.com.br">
-          <img src="img/twitter.png" alt="Twitter" className="twitter-icon" />
-        </a>
-        <img
-          src="img/etherscan.png"
-          alt="Etherscan"
-          className="etherscan-icon"
-        />
-        <img src="img/opensea.png" alt="Twitter" className="openSea-icon" />
-      </header>
+      <Header />
       <main>
         <section className="section-down-header">
           <img
