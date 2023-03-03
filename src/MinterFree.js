@@ -14,7 +14,6 @@ const MinterFree = () => {
   const [walletAddress, setWallet] = useState("");
   const [contract, setContract] = useState(null);
   const [isFree, setIsFree] = useState(false);
-  // eslint-disable-next-line no-unused-vars
   const [status, setStatus] = useState("");
 
   const [quantity, setQuantity] = useState(1);
@@ -178,7 +177,7 @@ const MinterFree = () => {
   };
 
   return (
-    <div className="container" style={{ height: "120vh" }}>
+    <div className="container">
       {error && <div className="error">{error}</div>}
       <Header />
       <main>
